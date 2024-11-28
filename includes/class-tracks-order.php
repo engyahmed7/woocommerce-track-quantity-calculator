@@ -1,11 +1,14 @@
 <?php
-class Tracks_Order {
-    public function __construct() {
+class Tracks_Order
+{
+    public function __construct()
+    {
         add_action('woocommerce_checkout_create_order_line_item', [$this, 'add_tracks_to_order'], 10, 4);
-        add_action('woocommerce_cart_calculate_fees', [$this, 'adjust_shipping_cost']);
+        add_filter('woocommerce_package_rates', [$this, 'adjust_flat_rate_cost'], 10, 2);
     }
 
-    public function add_tracks_to_order($item, $cart_item_key, $values, $order) {
+    public function add_tracks_to_order($item, $cart_item_key, $values, $order)
+    {
         $product_id = $values['product_id'];
         $max_tracks = get_post_meta($product_id, '_max_tracks_quantity', true);
 
@@ -16,39 +19,31 @@ class Tracks_Order {
         }
     }
 
-    public function adjust_shipping_cost($cart) {
-    if (is_admin() && !defined('DOING_AJAX')) return;
+    public function adjust_flat_rate_cost($rates, $package)
+    {
+        $total_tracks = 0;
 
-    $total_tracks = 0;
+        foreach (WC()->cart->get_cart() as $cart_item) {
+            $product_id = $cart_item['product_id'];
+            $max_tracks = (int) get_post_meta($product_id, '_max_tracks_quantity', true);
 
-    foreach (WC()->cart->get_cart() as $cart_item) {
-        $product_id = $cart_item['product_id'];
-        
-        $max_tracks = (int) get_post_meta($product_id, '_max_tracks_quantity', true);
+            if ($max_tracks <= 0) {
+                $max_tracks = 1;
+            }
 
-        if ($max_tracks <= 0) {
-            $max_tracks = 1; 
+            $quantity = $cart_item['quantity'];
+            $tracks = ceil($quantity / $max_tracks);
+            $total_tracks += $tracks;
         }
 
-        $quantity = $cart_item['quantity'];
-
-        $tracks = ceil($quantity / $max_tracks);
-        $total_tracks += $tracks;
-    }
-
-    if ($total_tracks > 0) {
-        $packages = WC()->shipping->get_packages();
-
-        foreach ($packages as $package_key => $package) {
-            if (!empty($package['rates'])) {
-                foreach ($package['rates'] as $rate_id => $rate) {
-                    $new_cost = $rate->cost * $total_tracks;
-                }
-
-                WC()->cart->add_fee(__('Shipping Adjustment', 'woocommerce-tracks'), $new_cost);
+        foreach ($rates as $rate_id => $rate) {
+            if ('flat_rate' === $rate->method_id) {
+                $flat_rate_base_cost = $rate->cost;
+                $adjusted_cost = $flat_rate_base_cost * $total_tracks;
+                $rates[$rate_id]->cost = $adjusted_cost;
             }
         }
-    }
-}
 
+        return $rates;
+    }
 }
