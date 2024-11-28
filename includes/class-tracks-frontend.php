@@ -24,23 +24,13 @@ class Tracks_Frontend
         }
 
         if ($max_tracks) {
-            echo '<div id="tracks-preview" style="margin-top: 10px; font-size: 14px;">';
-            echo '<small>' . __('Number of tracks will be calculated based on your quantity.', 'woocommerce-tracks') . '</small>';
-            echo '</div>';
-?>
-            <script>
-                jQuery(function($) {
-                    $('#quantity').on('change', function() {
-                        const quantity = $(this).val();
-                        const maxTracks = <?php echo esc_js($max_tracks); ?>;
-                        const tracks = Math.ceil(quantity / maxTracks);
-                        $('#tracks-preview').html(`<strong>Tracks:</strong> ${tracks}`);
-                    });
-                });
-            </script>
-<?php
+            echo '<div id="tracks-preview" style="margin-top: 10px; font-size: 14px;">
+                <small>' . __('Number of tracks will be calculated based on your quantity.', 'woocommerce-tracks') . '</small>
+            </div>';
+            echo '<input type="hidden" id="quantity" data-max-tracks="' . esc_attr($max_tracks) . '">';
         }
     }
+
 
     public function add_tracks_to_cart_item($cart_item_data, $product_id, $variation_id)
     {
