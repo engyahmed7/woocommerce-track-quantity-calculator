@@ -13,16 +13,9 @@ class Tracks_Admin
 
         add_filter('woocommerce_email_order_meta_fields', [$this, 'add_tracks_to_emails'], 10, 3);
 
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
     }
 
 
-    public function enqueue_scripts()
-    {
-        if (is_product()) {
-            wp_enqueue_script('tracks-quantity', plugin_dir_url(__FILE__) . 'assets/js/track-quantity.js', ['jquery'], '1.0', true);
-        }
-    }
     public function add_max_tracks_field()
     {
         woocommerce_wp_text_input([
