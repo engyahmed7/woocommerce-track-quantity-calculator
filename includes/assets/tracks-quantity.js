@@ -12,7 +12,7 @@ jQuery(function($) {
         }
     }
 
-    $('#quantity').on('keyup', updateTracksPreview);
+    $('#quantity').on('change keyup', updateTracksPreview);
 
     updateTracksPreview();
 });
