@@ -8,11 +8,6 @@ class Tracks_Admin
 
         add_action('woocommerce_process_product_meta', [$this, 'save_max_tracks_field']);
         add_action('woocommerce_save_product_variation', [$this, 'save_variation_max_tracks_field'], 10, 2);
-
-        add_action('woocommerce_admin_order_data_after_order_details', [$this, 'display_tracks_in_order_edit'], 10, 1);
-
-        add_filter('woocommerce_email_order_meta_fields', [$this, 'add_tracks_to_emails'], 10, 3);
-
     }
 
 
@@ -60,25 +55,6 @@ class Tracks_Admin
             update_post_meta($variation_id, '_variation_max_tracks_quantity', $max_tracks);
         }
     }
-
-    public function display_tracks_in_order_edit($order)
-    {
-        echo '<div class="tracks-order-info">';
-        echo '<h3>' . __('Tracks Quantity Details', 'woocommerce-tracks') . '</h3>';
-
-        foreach ($order->get_items() as $item_id => $item) {
-            $tracks_quantity = $item->get_meta('_tracks_quantity', true);
-            if ($tracks_quantity) {
-                echo '<p>';
-                echo '<strong>' . esc_html($item->get_name()) . ':</strong> ';
-                echo __('Tracks Quantity: ', 'woocommerce-tracks') . $tracks_quantity;
-                echo '</p>';
-            }
-        }
-
-        echo '</div>';
-    }
-
 
     public function add_tracks_to_emails($fields, $sent_to_admin, $order)
     {
