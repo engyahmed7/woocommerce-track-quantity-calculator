@@ -39,8 +39,18 @@ class Tracks_Order
         foreach ($rates as $rate_id => $rate) {
             if ('flat_rate' === $rate->method_id) {
                 $flat_rate_base_cost = $rate->cost;
-                $adjusted_cost = $flat_rate_base_cost * $total_tracks;
-                $rates[$rate_id]->cost = $adjusted_cost;
+                $tracks_fee = $flat_rate_base_cost * ($total_tracks - 1);
+
+                $rate->add_meta_data('base_cost', $flat_rate_base_cost);
+                $rate->add_meta_data('tracks_fee', $tracks_fee);
+
+                $rates[$rate_id]->cost = $flat_rate_base_cost + $tracks_fee;
+
+                $rates[$rate_id]->label .= sprintf(
+                    ' (Base: %s + Tracks Fee: %s)',
+                    wc_price($flat_rate_base_cost),
+                    wc_price($tracks_fee)
+                );
             }
         }
 
