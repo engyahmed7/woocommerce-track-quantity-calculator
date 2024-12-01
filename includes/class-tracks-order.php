@@ -18,11 +18,13 @@ class Tracks_Order
         }
 
         foreach ($order->get_shipping_methods() as $shipping_method) {
+            $shipping_method_id = $shipping_method->get_method_id();
             $base_cost = $shipping_method->get_meta('base_cost');
             $tracks_fee = $base_cost * ($total_tracks - 1);
 
             $new_label = sprintf(
-                ' (Base: %s + Tracks Fee: %s)',
+                '%s (Base: %s + Tracks Fee: %s)',
+                $shipping_method_id,
                 wc_price($base_cost),
                 wc_price($tracks_fee)
             );
