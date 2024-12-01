@@ -25,25 +25,39 @@ class Tracks_Frontend
                 true,
                 filemtime(plugins_url('/assets/tracks-quantity.js', __FILE__))
             );
+
+            global $product;
+            if ($product->is_type('variable')) {
+                $variations = $product->get_available_variations();
+                $variation_data = [];
+                foreach ($variations as $variation) {
+                    $variation_data[$variation['variation_id']] = get_post_meta($variation['variation_id'], '_variation_max_tracks_quantity', true);
+                }
+
+                wp_localize_script('tracks-frontend-js', 'tracksData', [
+                    'variationMaxTracks' => $variation_data,
+                ]);
+            }
         }
     }
-
 
     public function add_tracks_preview()
     {
         global $product;
         $max_tracks = get_post_meta($product->get_id(), '_max_tracks_quantity', true);
 
-        if ($product->is_type('variable') && isset($_GET['variation_id']) && $_GET['variation_id']) {
-            $variation_id = $_GET['variation_id'];
-            $max_tracks = get_post_meta($variation_id, '_variation_max_tracks_quantity', true);
-        }
-
-        if ($max_tracks) {
+        if ($product->is_type('variable')) {
             echo '<div id="tracks-preview" style="margin-top: 10px; font-size: 14px;">
-                <small>' . __('Number of tracks will be calculated based on your quantity.', 'woocommerce-tracks') . '</small>
-              </div>';
-            echo '<input type="hidden" id="max-tracks" value="' . esc_attr($max_tracks) . '">';
+            <small>' . __('Select a variation to see track quantity.', 'woocommerce-tracks') . '</small>
+          </div>';
+            echo '<input type="hidden" id="max-tracks" value="">';
+        } else {
+            if ($max_tracks) {
+                echo '<div id="tracks-preview" style="margin-top: 10px; font-size: 14px;">
+            <small>' . __('Number of tracks will be calculated based on your quantity.', 'woocommerce-tracks') . '</small>
+          </div>';
+                echo '<input type="hidden" id="max-tracks" value="' . esc_attr($max_tracks) . '">';
+            }
         }
     }
 
